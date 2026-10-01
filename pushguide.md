@@ -412,15 +412,15 @@ docker exec $(docker ps -q -f name=nginx) nginx -s reload
 
 ---
 
-## 🇮🇳 8. SevaSetu Production Setup Summary (Live on Port 854)
+## 🇮🇳 8. SevaSetu Production Setup Summary (Live on Port 811)
 
 This project (**SevaSetu Service Booking & Retailer Management Platform**) has been configured and deployed following the exact VPS architecture:
 
 ### 1. Live Access Information
-* **Public URL**: `http://201.18.210.181:854/` (or `http://localhost:854/`)
-* **Container Name**: `sevasetu_frontend`
+* **Public URL**: `http://201.18.210.181:811/` (or `http://localhost:811/`)
+* **Container Name**: `sevasetu_frontend` (Status: **Up & Running**)
 * **Docker Network**: `php-multi-version_default`
-* **Assigned Nginx Port**: `854` (bound via `php-multi-version-nginx-1`)
+* **Assigned Nginx Port**: `811` (within active `0.0.0.0:811-815->811-815/tcp` range on `php-multi-version-nginx-1`)
 
 ### 2. Files in Repository
 * `Dockerfile`: Multi-stage build (`node:20-alpine` build ➔ `nginx:alpine` runtime).
@@ -431,9 +431,9 @@ This project (**SevaSetu Service Booking & Retailer Management Platform**) has b
 ### 3. Central Reverse Proxy Configuration
 Appended to `/opt/php-multi-version/nginx/php82.conf`:
 ```nginx
-# ── SEVASETU CITIZEN SERVICES & RETAILER PLATFORM (Port 854) ──
+# ── SEVASETU CITIZEN SERVICES & RETAILER PLATFORM (Port 811) ──
 server {
-    listen 854;
+    listen 811;
     server_name 201.18.210.181 localhost _;
     client_max_body_size 50M;
 
