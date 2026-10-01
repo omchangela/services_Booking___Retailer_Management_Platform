@@ -409,3 +409,63 @@ docker exec $(docker ps -q -f name=nginx) nginx -s reload
 | **Clean unused images/cache** | `docker image prune -f` |
 | **Backup PostgreSQL DB** | `docker exec -t project_postgres pg_dump -U postgres my_project_db > backup.sql` |
 | **Restore PostgreSQL DB** | `cat backup.sql \| docker exec -i project_postgres psql -U postgres my_project_db` |
+
+---
+
+## 🇮🇳 8. SevaSetu Production Setup Summary (Live on Port 854)
+
+This project (**SevaSetu Service Booking & Retailer Management Platform**) has been configured and deployed following the exact VPS architecture:
+
+### 1. Live Access Information
+* **Public URL**: `http://201.18.210.181:854/` (or `http://localhost:854/`)
+* **Container Name**: `sevasetu_frontend`
+* **Docker Network**: `php-multi-version_default`
+* **Assigned Nginx Port**: `854` (bound via `php-multi-version-nginx-1`)
+
+### 2. Files in Repository
+* `Dockerfile`: Multi-stage build (`node:20-alpine` build ➔ `nginx:alpine` runtime).
+* `nginx.conf`: In-container SPA routing (`try_files $uri $uri/ /index.html;`), Gzip, static asset caching.
+* `docker-compose.yml`: Attached to `php-multi-version_default` external network with image `sevasetu_frontend:latest`.
+* `.dockerignore`: Excludes `node_modules`, `dist`, `.git`, logs.
+
+### 3. Central Reverse Proxy Configuration
+Appended to `/opt/php-multi-version/nginx/php82.conf`:
+```nginx
+# ── SEVASETU CITIZEN SERVICES & RETAILER PLATFORM (Port 854) ──
+server {
+    listen 854;
+    server_name 201.18.210.181 localhost _;
+    client_max_body_size 50M;
+
+    resolver 127.0.0.11 valid=30s ipv6=off;
+    set $sevasetu_frontend http://sevasetu_frontend:80;
+
+    location / {
+        proxy_pass $sevasetu_frontend;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+}
+```
+
+### 4. Updating SevaSetu After Code Changes
+```bash
+# 1. Pull latest changes from GitHub
+git pull origin main
+
+# 2. Rebuild and restart the container
+docker compose up -d --build
+
+# 3. View live logs
+docker compose logs -f sevasetu_frontend
+```
+

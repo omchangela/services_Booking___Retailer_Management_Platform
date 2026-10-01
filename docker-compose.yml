@@ -1,0 +1,14 @@
+services:
+  sevasetu_frontend:
+    image: sevasetu_frontend:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sevasetu_frontend
+    restart: always
+    networks:
+      - php-multi-version_default
+
+networks:
+  php-multi-version_default:
+    external: true
