@@ -194,7 +194,7 @@ export const ServiceDetailModal = () => {
                       </div>
                     </div>
 
-                    <DocFormatBadges allowPdf={doc.allowPdf} allowImage={doc.allowImage} isMandatory={doc.isMandatory} />
+                    <DocFormatBadges type={doc.type} allowPdf={doc.allowPdf} allowImage={doc.allowImage} isMandatory={doc.isMandatory} />
                   </div>
                 ))}
               </div>

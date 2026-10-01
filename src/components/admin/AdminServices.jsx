@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useApp } from "../../context/AppContext";
-import { normalizeDoc, DocFormatBadges } from "../../utils/docUtils";
+import { normalizeDoc, DocFormatBadges, VALIDATION_TYPES } from "../../utils/docUtils";
 import {
   FileCheck2,
   PlusCircle,
@@ -19,7 +19,11 @@ import {
   CheckSquare,
   Square,
   Sparkles,
-  Info
+  Info,
+  Hash,
+  Type,
+  Binary,
+  Files
 } from "lucide-react";
 
 export const AdminServices = () => {
@@ -54,13 +58,23 @@ export const AdminServices = () => {
       {
         id: "doc-1",
         title: "Aadhaar Card (Front & Back)",
+        type: "image_or_pdf",
         allowPdf: true,
         allowImage: true,
         isMandatory: true
       },
       {
         id: "doc-2",
+        title: "12-Digit Aadhaar Card Number",
+        type: "number",
+        allowPdf: false,
+        allowImage: false,
+        isMandatory: true
+      },
+      {
+        id: "doc-3",
         title: "Passport Size Color Photograph",
+        type: "image",
         allowPdf: false,
         allowImage: true,
         isMandatory: true
@@ -71,6 +85,7 @@ export const AdminServices = () => {
   // Current document input row for Add Modal
   const [docDraft, setDocDraft] = useState({
     title: "",
+    type: "image_or_pdf",
     allowPdf: true,
     allowImage: true,
     isMandatory: true
@@ -79,6 +94,7 @@ export const AdminServices = () => {
   // Document input row for Edit Modal
   const [editDocDraft, setEditDocDraft] = useState({
     title: "",
+    type: "image_or_pdf",
     allowPdf: true,
     allowImage: true,
     isMandatory: true
@@ -93,9 +109,10 @@ export const AdminServices = () => {
       commission: 60,
       turnaround: "24 - 48 Hours",
       docs: [
-        { id: "1", title: "Original Aadhaar Card Copy", allowPdf: true, allowImage: true, isMandatory: true },
-        { id: "2", title: "Valid Address Proof (Electricity / Rent / Bank)", allowPdf: true, allowImage: false, isMandatory: true },
-        { id: "3", title: "Applicant Mobile OTP Consent", allowPdf: false, allowImage: false, isMandatory: true }
+        { id: "1", title: "12-Digit Aadhaar Card Number", type: "number", allowPdf: false, allowImage: false, isMandatory: true },
+        { id: "2", title: "Active Mobile Number for UIDAI OTP", type: "number", allowPdf: false, allowImage: false, isMandatory: true },
+        { id: "3", title: "Original Aadhaar Card Scan", type: "image_or_pdf", allowPdf: true, allowImage: true, isMandatory: true },
+        { id: "4", title: "Valid Address Proof (Electricity / Rent / Bank)", type: "pdf", allowPdf: true, allowImage: false, isMandatory: true }
       ]
     },
     {
@@ -105,10 +122,11 @@ export const AdminServices = () => {
       commission: 70,
       turnaround: "5 - 7 Days",
       docs: [
-        { id: "1", title: "Proof of Identity (Aadhaar Card)", allowPdf: true, allowImage: true, isMandatory: true },
-        { id: "2", title: "Proof of Date of Birth (Marksheet/Birth Cert)", allowPdf: true, allowImage: true, isMandatory: true },
-        { id: "3", title: "Passport Size Photograph (White background)", allowPdf: false, allowImage: true, isMandatory: true },
-        { id: "4", title: "Customer Signature on White Paper", allowPdf: false, allowImage: true, isMandatory: true }
+        { id: "1", title: "Customer Full Name (as per 10th Marksheet)", type: "text", allowPdf: false, allowImage: false, isMandatory: true },
+        { id: "2", title: "Existing Aadhaar Card Number", type: "number", allowPdf: false, allowImage: false, isMandatory: true },
+        { id: "3", title: "Proof of Identity (Aadhaar / Voter ID)", type: "image_or_pdf", allowPdf: true, allowImage: true, isMandatory: true },
+        { id: "4", title: "Passport Size Photograph (White background)", type: "image", allowPdf: false, allowImage: true, isMandatory: true },
+        { id: "5", title: "Customer Signature on White Paper", type: "image", allowPdf: false, allowImage: true, isMandatory: true }
       ]
     },
     {
@@ -118,12 +136,12 @@ export const AdminServices = () => {
       commission: 700,
       turnaround: "3 - 5 Days",
       docs: [
-        { id: "1", title: "PAN Card of Business Owner", allowPdf: true, allowImage: true, isMandatory: true },
-        { id: "2", title: "Aadhaar Card of Applicant", allowPdf: true, allowImage: true, isMandatory: true },
-        { id: "3", title: "Electricity Bill of Business Premises", allowPdf: true, allowImage: false, isMandatory: true },
-        { id: "4", title: "Rent Agreement + NOC from Landlord", allowPdf: true, allowImage: false, isMandatory: true },
-        { id: "5", title: "Bank Cancelled Cheque / Statement", allowPdf: true, allowImage: true, isMandatory: true },
-        { id: "6", title: "Passport Size Photograph", allowPdf: false, allowImage: true, isMandatory: true }
+        { id: "1", title: "Business Owner PAN Card (10-Digit)", type: "alphanumeric", allowPdf: false, allowImage: false, isMandatory: true },
+        { id: "2", title: "Proprietor Aadhaar Number", type: "number", allowPdf: false, allowImage: false, isMandatory: true },
+        { id: "3", title: "Electricity Bill of Business Premises", type: "pdf", allowPdf: true, allowImage: false, isMandatory: true },
+        { id: "4", title: "Rent Agreement + NOC from Landlord", type: "pdf", allowPdf: true, allowImage: false, isMandatory: true },
+        { id: "5", title: "Bank Cancelled Cheque / Statement", type: "image_or_pdf", allowPdf: true, allowImage: true, isMandatory: true },
+        { id: "6", title: "Passport Size Photograph", type: "image", allowPdf: false, allowImage: true, isMandatory: true }
       ]
     },
     {
@@ -133,9 +151,10 @@ export const AdminServices = () => {
       commission: 300,
       turnaround: "24 Hours",
       docs: [
-        { id: "1", title: "Applicant Aadhaar Card", allowPdf: true, allowImage: true, isMandatory: true },
-        { id: "2", title: "Business PAN Card", allowPdf: true, allowImage: true, isMandatory: true },
-        { id: "3", title: "Bank Account Details (Passbook/Cheque)", allowPdf: true, allowImage: true, isMandatory: true }
+        { id: "1", title: "Applicant Aadhaar Number", type: "number", allowPdf: false, allowImage: false, isMandatory: true },
+        { id: "2", title: "Business PAN Card Number", type: "alphanumeric", allowPdf: false, allowImage: false, isMandatory: true },
+        { id: "3", title: "Enterprise Name as per Registration", type: "alphanumeric", allowPdf: false, allowImage: false, isMandatory: true },
+        { id: "4", title: "Bank Account Details (Passbook/Cheque)", type: "image_or_pdf", allowPdf: true, allowImage: true, isMandatory: true }
       ]
     }
   ];
@@ -156,11 +175,13 @@ export const AdminServices = () => {
 
   const handleAddDocToNew = () => {
     if (!docDraft.title.trim()) return;
+    const type = docDraft.type || "image_or_pdf";
     const newDocItem = {
       id: Date.now().toString(),
       title: docDraft.title.trim(),
-      allowPdf: docDraft.allowPdf,
-      allowImage: docDraft.allowImage,
+      type,
+      allowPdf: type === "pdf" || type === "image_or_pdf",
+      allowImage: type === "image" || type === "image_or_pdf",
       isMandatory: docDraft.isMandatory
     };
     setNewSrv((prev) => ({
@@ -169,6 +190,7 @@ export const AdminServices = () => {
     }));
     setDocDraft({
       title: "",
+      type: "image_or_pdf",
       allowPdf: true,
       allowImage: true,
       isMandatory: true
@@ -191,13 +213,29 @@ export const AdminServices = () => {
     });
   };
 
+  const handleUpdateDocTypeInNew = (idx, newType) => {
+    setNewSrv((prev) => {
+      const updated = [...prev.requiredDocuments];
+      const norm = normalizeDoc(updated[idx]);
+      updated[idx] = {
+        ...norm,
+        type: newType,
+        allowPdf: newType === "pdf" || newType === "image_or_pdf",
+        allowImage: newType === "image" || newType === "image_or_pdf"
+      };
+      return { ...prev, requiredDocuments: updated };
+    });
+  };
+
   const handleAddDocToEdit = () => {
     if (!editDocDraft.title.trim() || !editingService) return;
+    const type = editDocDraft.type || "image_or_pdf";
     const newDocItem = {
       id: Date.now().toString(),
       title: editDocDraft.title.trim(),
-      allowPdf: editDocDraft.allowPdf,
-      allowImage: editDocDraft.allowImage,
+      type,
+      allowPdf: type === "pdf" || type === "image_or_pdf",
+      allowImage: type === "image" || type === "image_or_pdf",
       isMandatory: editDocDraft.isMandatory
     };
     const currentDocs = (editingService.requiredDocuments || []).map(normalizeDoc);
@@ -207,6 +245,7 @@ export const AdminServices = () => {
     });
     setEditDocDraft({
       title: "",
+      type: "image_or_pdf",
       allowPdf: true,
       allowImage: true,
       isMandatory: true
@@ -226,6 +265,21 @@ export const AdminServices = () => {
     if (!editingService) return;
     const currentDocs = (editingService.requiredDocuments || []).map(normalizeDoc);
     currentDocs[idx].isMandatory = !currentDocs[idx].isMandatory;
+    setEditingService({
+      ...editingService,
+      requiredDocuments: currentDocs
+    });
+  };
+
+  const handleUpdateDocTypeInEdit = (idx, newType) => {
+    if (!editingService) return;
+    const currentDocs = (editingService.requiredDocuments || []).map(normalizeDoc);
+    currentDocs[idx] = {
+      ...currentDocs[idx],
+      type: newType,
+      allowPdf: newType === "pdf" || newType === "image_or_pdf",
+      allowImage: newType === "image" || newType === "image_or_pdf"
+    };
     setEditingService({
       ...editingService,
       requiredDocuments: currentDocs
@@ -458,7 +512,7 @@ export const AdminServices = () => {
                             <span style={{ fontWeight: 500, color: "var(--secondary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                               {doc.title}
                             </span>
-                            <DocFormatBadges allowPdf={doc.allowPdf} allowImage={doc.allowImage} isMandatory={doc.isMandatory} />
+                            <DocFormatBadges type={doc.type} allowPdf={doc.allowPdf} allowImage={doc.allowImage} isMandatory={doc.isMandatory} />
                           </div>
                         ))}
                         {docs.length > 2 && (
@@ -675,7 +729,7 @@ export const AdminServices = () => {
                   </div>
                 </div>
 
-                {/* REQUIRED DOCUMENTS CONFIGURATION (WHAT IS NEEDED) */}
+                {/* REQUIRED DOCUMENTS CONFIGURATION (WHAT IS NEEDED & VALIDATION RULES) */}
                 <div
                   style={{
                     border: "1.5px solid var(--primary-border)",
@@ -685,11 +739,11 @@ export const AdminServices = () => {
                     marginBottom: "1rem"
                   }}
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       <FileText size={18} color="var(--primary)" />
-                      <h4 style={{ fontSize: "1rem", color: "var(--secondary)" }}>
-                        Required Documents (What Needed For This Service)
+                      <h4 style={{ fontSize: "1rem", color: "var(--secondary)", margin: 0 }}>
+                        Required Documents & Citizen Fields Validation Rules
                       </h4>
                     </div>
                     <span className="badge badge-blue">
@@ -697,100 +751,144 @@ export const AdminServices = () => {
                     </span>
                   </div>
 
-                  <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "1rem" }}>
-                    Define document titles, accepted formats (<strong>Image / PDF</strong>), and toggle the <strong>Mandatory checkbox</strong>.
+                  <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "0.85rem" }}>
+                    Configure what customer inputs or uploads are needed. Set the validation rule (<strong>Only Number</strong>, <strong>Only Text</strong>, <strong>Number & Text Both</strong>, <strong>Image</strong>, or <strong>PDF</strong>) and toggle <strong>Mandatory</strong>.
                   </p>
 
-                  {/* Add Document Row */}
+                  {/* Quick Template Chips */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", marginBottom: "0.85rem" }}>
+                    <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--text-muted)" }}>Quick Templates:</span>
+                    {[
+                      { title: "12-Digit Aadhaar Number", type: "number" },
+                      { title: "Customer Full Name", type: "text" },
+                      { title: "PAN Card Number", type: "alphanumeric" },
+                      { title: "Passport Size Photograph", type: "image" },
+                      { title: "Address Proof Document", type: "pdf" },
+                      { title: "Aadhaar / ID Card Copy", type: "image_or_pdf" }
+                    ].map((tpl) => (
+                      <button
+                        key={tpl.title}
+                        type="button"
+                        onClick={() => setDocDraft({ ...docDraft, title: tpl.title, type: tpl.type })}
+                        style={{
+                          background: docDraft.title === tpl.title ? "var(--primary-subtle)" : "#f1f5f9",
+                          border: "1px solid",
+                          borderColor: docDraft.title === tpl.title ? "var(--primary)" : "var(--card-border)",
+                          color: docDraft.title === tpl.title ? "var(--primary)" : "var(--secondary)",
+                          padding: "0.25rem 0.6rem",
+                          borderRadius: "var(--radius-sm)",
+                          fontSize: "0.72rem",
+                          fontWeight: 600,
+                          cursor: "pointer"
+                        }}
+                      >
+                        + {tpl.title}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Add Document / Validation Field Row */}
                   <div
                     style={{
-                      display: "grid",
-                      gridTemplateColumns: "1.6fr 1fr 1fr auto",
-                      gap: "0.75rem",
-                      alignItems: "center",
                       background: "#f8fafc",
-                      padding: "0.85rem",
+                      padding: "0.9rem",
                       borderRadius: "var(--radius-md)",
                       border: "1px solid var(--card-border)",
                       marginBottom: "1rem"
                     }}
                   >
-                    <div>
-                      <label className="form-label" style={{ fontSize: "0.75rem", marginBottom: "3px" }}>
-                        Document Title / Name *
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Aadhaar Card / Electricity Bill / Photo"
-                        className="form-control"
-                        style={{ padding: "0.45rem 0.75rem", fontSize: "0.85rem" }}
-                        value={docDraft.title}
-                        onChange={(e) => setDocDraft({ ...docDraft, title: e.target.value })}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            handleAddDocToNew();
-                          }
-                        }}
-                      />
-                    </div>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1.7fr 1.6fr 1fr auto",
+                        gap: "0.75rem",
+                        alignItems: "end"
+                      }}
+                    >
+                      <div>
+                        <label className="form-label" style={{ fontSize: "0.75rem", marginBottom: "4px" }}>
+                          Field / Document Title *
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Aadhaar Card / PAN Number / Customer Photo"
+                          className="form-control"
+                          style={{ padding: "0.5rem 0.75rem", fontSize: "0.85rem" }}
+                          value={docDraft.title}
+                          onChange={(e) => setDocDraft({ ...docDraft, title: e.target.value })}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleAddDocToNew();
+                            }
+                          }}
+                        />
+                      </div>
 
-                    <div>
-                      <label className="form-label" style={{ fontSize: "0.75rem", marginBottom: "3px" }}>
-                        Accepted File Formats
-                      </label>
-                      <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                        <label style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "0.8rem", cursor: "pointer" }}>
+                      <div>
+                        <label className="form-label" style={{ fontSize: "0.75rem", marginBottom: "4px" }}>
+                          Allowed Input / Validation Type *
+                        </label>
+                        <select
+                          className="form-control"
+                          style={{ padding: "0.5rem 0.75rem", fontSize: "0.85rem", fontWeight: 600 }}
+                          value={docDraft.type || "image_or_pdf"}
+                          onChange={(e) => setDocDraft({ ...docDraft, type: e.target.value })}
+                        >
+                          <option value="number">🔢 Only Number (0-9 Digits)</option>
+                          <option value="text">🔤 Only Text (A-Z Alphabets)</option>
+                          <option value="alphanumeric">🔠 Number & Text Both (Alphanumeric)</option>
+                          <option value="image">🖼️ Image File (.JPG, .PNG)</option>
+                          <option value="pdf">📄 PDF Document (.PDF)</option>
+                          <option value="image_or_pdf">📎 Image or PDF (Both Accepted)</option>
+                        </select>
+                      </div>
+
+                      <div style={{ paddingBottom: "8px" }}>
+                        <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "0.82rem", cursor: "pointer", fontWeight: 600 }}>
                           <input
                             type="checkbox"
-                            checked={docDraft.allowPdf}
-                            onChange={(e) => setDocDraft({ ...docDraft, allowPdf: e.target.checked })}
+                            checked={docDraft.isMandatory}
+                            onChange={(e) => setDocDraft({ ...docDraft, isMandatory: e.target.checked })}
                           />
-                          <span style={{ fontWeight: 600, color: "#991b1b" }}>PDF</span>
+                          <span style={{ color: docDraft.isMandatory ? "var(--rose)" : "var(--text-muted)" }}>
+                            {docDraft.isMandatory ? "Mandatory *" : "Optional"}
+                          </span>
                         </label>
-                        <label style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "0.8rem", cursor: "pointer" }}>
-                          <input
-                            type="checkbox"
-                            checked={docDraft.allowImage}
-                            onChange={(e) => setDocDraft({ ...docDraft, allowImage: e.target.checked })}
-                          />
-                          <span style={{ fontWeight: 600, color: "#3730a3" }}>Image</span>
-                        </label>
+                      </div>
+
+                      <div>
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          style={{ padding: "0.5rem 0.9rem", fontSize: "0.85rem", display: "flex", alignItems: "center", gap: "5px" }}
+                          onClick={handleAddDocToNew}
+                        >
+                          <Plus size={15} />
+                          <span>Add</span>
+                        </button>
                       </div>
                     </div>
 
-                    <div>
-                      <label className="form-label" style={{ fontSize: "0.75rem", marginBottom: "3px" }}>
-                        Requirement Rule
-                      </label>
-                      <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "0.8rem", cursor: "pointer" }}>
-                        <input
-                          type="checkbox"
-                          checked={docDraft.isMandatory}
-                          onChange={(e) => setDocDraft({ ...docDraft, isMandatory: e.target.checked })}
-                        />
-                        <span style={{ fontWeight: 700, color: "var(--secondary)" }}>Mandatory Document</span>
-                      </label>
-                    </div>
-
-                    <div>
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-primary"
-                        style={{ marginTop: "16px", padding: "0.45rem 0.85rem" }}
-                        onClick={handleAddDocToNew}
-                      >
-                        <Plus size={15} />
-                        <span>Add</span>
-                      </button>
+                    {/* Live Rule Explanation */}
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "0.6rem", fontSize: "0.72rem", color: "var(--text-muted)" }}>
+                      <Info size={13} color="var(--primary)" />
+                      <span>
+                        {docDraft.type === "number" && "Retailer will only be allowed to enter numeric digits (0-9). Example: 12-digit Aadhaar, Mobile number, PIN code."}
+                        {docDraft.type === "text" && "Retailer will only be allowed to enter alphabetical letters. Example: Customer Full Name, Father's Name."}
+                        {docDraft.type === "alphanumeric" && "Retailer can enter both letters and numbers. Example: PAN Card (ABCDE1234F), Voter ID, Driving Licence."}
+                        {docDraft.type === "image" && "Retailer must upload an Image file (.jpg, .jpeg, .png). Example: Passport photograph, Customer signature."}
+                        {docDraft.type === "pdf" && "Retailer must upload a PDF document (.pdf). Example: Rent agreement, Bank statement, Electricity bill."}
+                        {docDraft.type === "image_or_pdf" && "Retailer can upload either a PDF document or an Image file. Example: Aadhaar copy, Address proof."}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Documents List Table with Checkboxes */}
+                  {/* Documents & Fields List Table with Checkboxes */}
                   <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                     {newSrv.requiredDocuments.length === 0 ? (
                       <div style={{ textAlign: "center", padding: "1.5rem", color: "var(--text-muted)", fontSize: "0.85rem" }}>
-                        No documents added yet. Type a document title above or click preset buttons.
+                        No requirement fields added yet. Choose a template above or type a title to add.
                       </div>
                     ) : (
                       newSrv.requiredDocuments.map((docItem, idx) => {
@@ -802,13 +900,14 @@ export const AdminServices = () => {
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "space-between",
-                              padding: "0.6rem 0.85rem",
+                              padding: "0.65rem 0.85rem",
                               borderRadius: "var(--radius-md)",
                               border: "1px solid var(--card-border)",
-                              background: doc.isMandatory ? "#fbfcfe" : "#ffffff"
+                              background: doc.isMandatory ? "#fbfcfe" : "#ffffff",
+                              gap: "0.75rem"
                             }}
                           >
-                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: 0 }}>
                               <button
                                 type="button"
                                 onClick={() => handleToggleDocMandatoryInNew(idx)}
@@ -817,23 +916,48 @@ export const AdminServices = () => {
                                   alignItems: "center",
                                   color: doc.isMandatory ? "var(--emerald)" : "#94a3b8"
                                 }}
-                                title="Click to toggle Mandatory checkbox"
+                                title="Click to toggle Mandatory status"
                               >
                                 {doc.isMandatory ? <CheckSquare size={18} /> : <Square size={18} />}
                               </button>
 
-                              <div>
-                                <div style={{ fontWeight: 700, fontSize: "0.88rem", color: "var(--secondary)" }}>
+                              <div style={{ minWidth: 0 }}>
+                                <div style={{ fontWeight: 700, fontSize: "0.88rem", color: "var(--secondary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                                   {doc.title}
                                 </div>
                                 <div style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>
-                                  Rule: {doc.isMandatory ? "Mandatory requirement" : "Optional supporting document"}
+                                  Rule: {doc.isMandatory ? "Mandatory requirement" : "Optional field"}
                                 </div>
                               </div>
                             </div>
 
-                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+                              {/* Quick In-place Type Switcher */}
+                              <select
+                                value={doc.type || "image_or_pdf"}
+                                onChange={(e) => handleUpdateDocTypeInNew(idx, e.target.value)}
+                                style={{
+                                  fontSize: "0.75rem",
+                                  padding: "0.25rem 0.5rem",
+                                  borderRadius: "var(--radius-sm)",
+                                  border: "1px solid var(--card-border)",
+                                  background: "#ffffff",
+                                  fontWeight: 600,
+                                  color: "var(--secondary)",
+                                  cursor: "pointer"
+                                }}
+                                title="Change validation type"
+                              >
+                                <option value="number">🔢 Only Number</option>
+                                <option value="text">🔤 Only Text</option>
+                                <option value="alphanumeric">🔠 Number & Text</option>
+                                <option value="image">🖼️ Image</option>
+                                <option value="pdf">📄 PDF</option>
+                                <option value="image_or_pdf">📎 Image or PDF</option>
+                              </select>
+
                               <DocFormatBadges
+                                type={doc.type}
                                 allowPdf={doc.allowPdf}
                                 allowImage={doc.allowImage}
                                 isMandatory={doc.isMandatory}
@@ -843,7 +967,7 @@ export const AdminServices = () => {
                                 type="button"
                                 onClick={() => handleRemoveDocFromNew(doc.id || idx)}
                                 style={{ color: "var(--rose)", padding: "4px", display: "flex" }}
-                                title="Remove Document"
+                                title="Remove Requirement"
                               >
                                 <X size={16} />
                               </button>
@@ -971,7 +1095,7 @@ export const AdminServices = () => {
                   </div>
                 </div>
 
-                {/* Edit Required Documents Checklist */}
+                {/* Edit Required Documents Checklist & Validation Rules */}
                 <div
                   style={{
                     border: "1.5px solid var(--primary-border)",
@@ -980,78 +1104,149 @@ export const AdminServices = () => {
                     background: "#ffffff"
                   }}
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
-                    <h4 style={{ fontSize: "0.95rem", color: "var(--secondary)" }}>
-                      Required Documents (What Needed)
-                    </h4>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <FileText size={18} color="var(--primary)" />
+                      <h4 style={{ fontSize: "0.95rem", color: "var(--secondary)", margin: 0 }}>
+                        Required Documents & Citizen Fields Validation Rules
+                      </h4>
+                    </div>
                     <span className="badge badge-blue">
-                      {(editingService.requiredDocuments || []).length} Documents
+                      {(editingService.requiredDocuments || []).length} Requirements
                     </span>
                   </div>
 
-                  {/* Add row */}
+                  <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "0.85rem" }}>
+                    Configure what customer inputs or uploads are needed. Set the validation rule (<strong>Only Number</strong>, <strong>Only Text</strong>, <strong>Number & Text Both</strong>, <strong>Image</strong>, or <strong>PDF</strong>) and toggle <strong>Mandatory</strong>.
+                  </p>
+
+                  {/* Quick Template Chips */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", marginBottom: "0.85rem" }}>
+                    <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--text-muted)" }}>Quick Templates:</span>
+                    {[
+                      { title: "12-Digit Aadhaar Number", type: "number" },
+                      { title: "Customer Full Name", type: "text" },
+                      { title: "PAN Card Number", type: "alphanumeric" },
+                      { title: "Passport Size Photograph", type: "image" },
+                      { title: "Address Proof Document", type: "pdf" },
+                      { title: "Aadhaar / ID Card Copy", type: "image_or_pdf" }
+                    ].map((tpl) => (
+                      <button
+                        key={tpl.title}
+                        type="button"
+                        onClick={() => setEditDocDraft({ ...editDocDraft, title: tpl.title, type: tpl.type })}
+                        style={{
+                          background: editDocDraft.title === tpl.title ? "var(--primary-subtle)" : "#f1f5f9",
+                          border: "1px solid",
+                          borderColor: editDocDraft.title === tpl.title ? "var(--primary)" : "var(--card-border)",
+                          color: editDocDraft.title === tpl.title ? "var(--primary)" : "var(--secondary)",
+                          padding: "0.25rem 0.6rem",
+                          borderRadius: "var(--radius-sm)",
+                          fontSize: "0.72rem",
+                          fontWeight: 600,
+                          cursor: "pointer"
+                        }}
+                      >
+                        + {tpl.title}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Add Field Row */}
                   <div
                     style={{
-                      display: "grid",
-                      gridTemplateColumns: "1.6fr 1fr 1fr auto",
-                      gap: "0.75rem",
-                      alignItems: "center",
                       background: "#f8fafc",
-                      padding: "0.75rem",
+                      padding: "0.85rem",
                       borderRadius: "var(--radius-md)",
                       border: "1px solid var(--card-border)",
-                      marginBottom: "0.75rem"
+                      marginBottom: "1rem"
                     }}
                   >
-                    <div>
-                      <input
-                        type="text"
-                        placeholder="Document Title (e.g. Aadhaar Card, Electricity Bill)..."
-                        className="form-control"
-                        style={{ padding: "0.45rem 0.75rem", fontSize: "0.85rem" }}
-                        value={editDocDraft.title}
-                        onChange={(e) => setEditDocDraft({ ...editDocDraft, title: e.target.value })}
-                      />
-                    </div>
-
-                    <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                      <label style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "0.8rem", cursor: "pointer" }}>
-                        <input
-                          type="checkbox"
-                          checked={editDocDraft.allowPdf}
-                          onChange={(e) => setEditDocDraft({ ...editDocDraft, allowPdf: e.target.checked })}
-                        />
-                        <span style={{ fontWeight: 600, color: "#991b1b" }}>PDF</span>
-                      </label>
-                      <label style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "0.8rem", cursor: "pointer" }}>
-                        <input
-                          type="checkbox"
-                          checked={editDocDraft.allowImage}
-                          onChange={(e) => setEditDocDraft({ ...editDocDraft, allowImage: e.target.checked })}
-                        />
-                        <span style={{ fontWeight: 600, color: "#3730a3" }}>Image</span>
-                      </label>
-                    </div>
-
-                    <div>
-                      <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "0.8rem", cursor: "pointer" }}>
-                        <input
-                          type="checkbox"
-                          checked={editDocDraft.isMandatory}
-                          onChange={(e) => setEditDocDraft({ ...editDocDraft, isMandatory: e.target.checked })}
-                        />
-                        <span style={{ fontWeight: 700 }}>Mandatory</span>
-                      </label>
-                    </div>
-
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-primary"
-                      onClick={handleAddDocToEdit}
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1.7fr 1.6fr 1fr auto",
+                        gap: "0.75rem",
+                        alignItems: "end"
+                      }}
                     >
-                      <Plus size={15} />
-                      <span>Add</span>
-                    </button>
+                      <div>
+                        <label className="form-label" style={{ fontSize: "0.75rem", marginBottom: "4px" }}>
+                          Field / Document Title *
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Aadhaar Card / PAN Number / Document..."
+                          className="form-control"
+                          style={{ padding: "0.45rem 0.75rem", fontSize: "0.85rem" }}
+                          value={editDocDraft.title}
+                          onChange={(e) => setEditDocDraft({ ...editDocDraft, title: e.target.value })}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleAddDocToEdit();
+                            }
+                          }}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="form-label" style={{ fontSize: "0.75rem", marginBottom: "4px" }}>
+                          Allowed Input / Validation Type *
+                        </label>
+                        <select
+                          className="form-control"
+                          style={{ padding: "0.45rem 0.75rem", fontSize: "0.85rem", fontWeight: 600 }}
+                          value={editDocDraft.type || "image_or_pdf"}
+                          onChange={(e) => setEditDocDraft({ ...editDocDraft, type: e.target.value })}
+                        >
+                          <option value="number">🔢 Only Number (0-9 Digits)</option>
+                          <option value="text">🔤 Only Text (A-Z Alphabets)</option>
+                          <option value="alphanumeric">🔠 Number & Text Both (Alphanumeric)</option>
+                          <option value="image">🖼️ Image File (.JPG, .PNG)</option>
+                          <option value="pdf">📄 PDF Document (.PDF)</option>
+                          <option value="image_or_pdf">📎 Image or PDF (Both Accepted)</option>
+                        </select>
+                      </div>
+
+                      <div style={{ paddingBottom: "6px" }}>
+                        <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "0.8rem", cursor: "pointer", fontWeight: 600 }}>
+                          <input
+                            type="checkbox"
+                            checked={editDocDraft.isMandatory}
+                            onChange={(e) => setEditDocDraft({ ...editDocDraft, isMandatory: e.target.checked })}
+                          />
+                          <span style={{ color: editDocDraft.isMandatory ? "var(--rose)" : "var(--text-muted)" }}>
+                            {editDocDraft.isMandatory ? "Mandatory *" : "Optional"}
+                          </span>
+                        </label>
+                      </div>
+
+                      <div>
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-primary"
+                          style={{ padding: "0.45rem 0.85rem", display: "flex", alignItems: "center", gap: "4px" }}
+                          onClick={handleAddDocToEdit}
+                        >
+                          <Plus size={15} />
+                          <span>Add</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Live Rule Explanation */}
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "0.5rem", fontSize: "0.72rem", color: "var(--text-muted)" }}>
+                      <Info size={13} color="var(--primary)" />
+                      <span>
+                        {editDocDraft.type === "number" && "Retailer will only be allowed to enter numeric digits (0-9). Example: 12-digit Aadhaar, Mobile number, PIN code."}
+                        {editDocDraft.type === "text" && "Retailer will only be allowed to enter alphabetical letters. Example: Customer Full Name, Father's Name."}
+                        {editDocDraft.type === "alphanumeric" && "Retailer can enter both letters and numbers. Example: PAN Card (ABCDE1234F), Voter ID, Driving Licence."}
+                        {editDocDraft.type === "image" && "Retailer must upload an Image file (.jpg, .jpeg, .png). Example: Passport photograph, Customer signature."}
+                        {editDocDraft.type === "pdf" && "Retailer must upload a PDF document (.pdf). Example: Rent agreement, Bank statement, Electricity bill."}
+                        {editDocDraft.type === "image_or_pdf" && "Retailer can upload either a PDF document or an Image file. Example: Aadhaar copy, Address proof."}
+                      </span>
+                    </div>
                   </div>
 
                   {/* Document List */}
@@ -1068,10 +1263,11 @@ export const AdminServices = () => {
                             padding: "0.55rem 0.85rem",
                             borderRadius: "var(--radius-md)",
                             border: "1px solid var(--card-border)",
-                            background: doc.isMandatory ? "#fbfcfe" : "#ffffff"
+                            background: doc.isMandatory ? "#fbfcfe" : "#ffffff",
+                            gap: "0.75rem"
                           }}
                         >
-                          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: 0 }}>
                             <button
                               type="button"
                               onClick={() => handleToggleDocMandatoryInEdit(idx)}
@@ -1080,17 +1276,53 @@ export const AdminServices = () => {
                             >
                               {doc.isMandatory ? <CheckSquare size={18} /> : <Square size={18} />}
                             </button>
-                            <span style={{ fontWeight: 600, fontSize: "0.85rem" }}>
-                              {doc.title}
-                            </span>
+                            <div style={{ minWidth: 0 }}>
+                              <div style={{ fontWeight: 600, fontSize: "0.85rem", color: "var(--secondary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                {doc.title}
+                              </div>
+                              <div style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>
+                                Rule: {doc.isMandatory ? "Mandatory requirement" : "Optional field"}
+                              </div>
+                            </div>
                           </div>
 
-                          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                            <DocFormatBadges allowPdf={doc.allowPdf} allowImage={doc.allowImage} isMandatory={doc.isMandatory} />
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+                            {/* In-place validation type switcher */}
+                            <select
+                              value={doc.type || "image_or_pdf"}
+                              onChange={(e) => handleUpdateDocTypeInEdit(idx, e.target.value)}
+                              style={{
+                                fontSize: "0.75rem",
+                                padding: "0.25rem 0.5rem",
+                                borderRadius: "var(--radius-sm)",
+                                border: "1px solid var(--card-border)",
+                                background: "#ffffff",
+                                fontWeight: 600,
+                                color: "var(--secondary)",
+                                cursor: "pointer"
+                              }}
+                              title="Change validation type"
+                            >
+                              <option value="number">🔢 Only Number</option>
+                              <option value="text">🔤 Only Text</option>
+                              <option value="alphanumeric">🔠 Number & Text</option>
+                              <option value="image">🖼️ Image</option>
+                              <option value="pdf">📄 PDF</option>
+                              <option value="image_or_pdf">📎 Image or PDF</option>
+                            </select>
+
+                            <DocFormatBadges
+                              type={doc.type}
+                              allowPdf={doc.allowPdf}
+                              allowImage={doc.allowImage}
+                              isMandatory={doc.isMandatory}
+                            />
+
                             <button
                               type="button"
                               onClick={() => handleRemoveDocFromEdit(idx)}
                               style={{ color: "var(--rose)", display: "flex" }}
+                              title="Remove Requirement"
                             >
                               <X size={15} />
                             </button>
@@ -1119,10 +1351,10 @@ export const AdminServices = () => {
       {/* VIEW ALL REQUIRED DOCUMENTS MODAL */}
       {viewDocsService && (
         <div className="modal-overlay" onClick={() => setViewDocsService(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "550px" }}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "580px" }}>
             <div className="modal-header">
               <div>
-                <h3>Required Documents Checklist</h3>
+                <h3>Required Documents & Input Rules</h3>
                 <p style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
                   {viewDocsService.name} ({viewDocsService.categoryName})
                 </p>
@@ -1145,7 +1377,8 @@ export const AdminServices = () => {
                         background: "#f8fafc",
                         display: "flex",
                         justifyContent: "space-between",
-                        alignItems: "center"
+                        alignItems: "center",
+                        gap: "1rem"
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -1162,7 +1395,12 @@ export const AdminServices = () => {
                         </div>
                       </div>
 
-                      <DocFormatBadges allowPdf={doc.allowPdf} allowImage={doc.allowImage} isMandatory={doc.isMandatory} />
+                      <DocFormatBadges
+                        type={doc.type}
+                        allowPdf={doc.allowPdf}
+                        allowImage={doc.allowImage}
+                        isMandatory={doc.isMandatory}
+                      />
                     </div>
                   );
                 })}
